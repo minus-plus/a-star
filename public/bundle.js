@@ -84,8 +84,45 @@ var _Graph2 = _interopRequireDefault(_Graph);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function drawRect(ctx, x, y, w, h, r, color) {
+  console.log("drawing " + color);
+  color = color || "#e3e3e3";
+  ctx.beginPath();
+  ctx.moveTo(x, y + r);
+  ctx.lineTo(x, y + h - r);
+  ctx.arcTo(x, y + h, x + r, y + h, r);
+  ctx.lineTo(x + w - r, y + h);
+  ctx.arcTo(x + w, y + h, x + w, y + h - r, r);
+  ctx.lineTo(x + w, y + r);
+  ctx.arcTo(x + w, y, x + w - r, y, r);
+  ctx.lineTo(x + r, y);
+  ctx.arcTo(x, y, x, y + r, r);
+  ctx.fillStyle = color;
+  ctx.fill();
+}
+
 (0, _domready2.default)(function () {
-  console.log('main');
+  var canvas = document.getElementById("canvas");
+  var ctx = canvas.getContext('2d');
+  // drawRect(ctx, 1,1, 23, 23, 8);
+  for (var i = 0; i < 20; i++) {
+    for (var j = 0; j < 20; j++) {
+      var x = i * 25 + 1;
+      var y = j * 25 + 1;
+      drawRect(ctx, x, y, 23, 23, 8);
+    }
+  }
+
+  canvas.addEventListener('click', function (event) {
+    var rect = canvas.getBoundingClientRect();
+    var x = event.clientX - rect.left;
+    var y = event.clientY - rect.top;
+
+    var index_x = ~~(x / 25);
+    var index_y = ~~(y / 25);
+    // go to the index and draw with another color
+    drawRect(ctx, index_x * 25 + 1, index_y * 25 + 1, 23, 23, 8, "#42f4c8");
+  }, false);
 });
 
 /***/ }),

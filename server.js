@@ -10,7 +10,6 @@ const session = require('express-session');
 const logger = require('morgan');
 
 const app = express();
-const projects = require('./public/assets/data/projects');
 
 app.set("view engine", "pug");
 app.set("views", path.join(__dirname, "views"));
@@ -23,9 +22,9 @@ app.use(logger('dev'));
 
 
 app.get('*', function(req, res) {
-  res.render('index', projects);
+  res.render('index');
 });
-const port = process.env.PORT || 8080;
+const port = process.env.PORT || 3000;
 app.listen(port, function() {
   console.log(`web-server running on localhost:${port}`);
 });

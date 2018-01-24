@@ -1,0 +1,66 @@
+doctype html
+html
+  head
+    meta(http-equiv='Content-Type', content='text/html; charset=UTF-8')
+    title A* path-finding algorithm
+    link(rel='stylesheet', type='text/css', media='screen, projection', href='style.css')
+    script(src="bundle.js" type='text/javascript')
+  body
+    #header
+      h1 javascript-astar
+    #content
+      #controls.clear
+        label(for='selectWallFrequency') Wall Frequency:
+        select#selectWallFrequency
+          option(value='.1') 10%
+          option(value='.2') 20%
+          option(value='.3') 30%
+          option(value='.4') 40%
+        br
+        label(for='selectGridSize') Grid Size:
+        select#selectGridSize(name='selectGridSize')
+          option(value='10') 10x10
+          option(value='15') 15x15
+          option(value='20') 20x20
+          option(value='30') 30x30
+          option(value='40', selected='selected') 40x40
+          option(value='50') 50x50
+          option(value='100') 100x100
+          option(value='150') 150x150
+        br
+        label(for='checkDebug') Show search info?
+        input#checkDebug(type='checkbox', name='checkDebug')
+        br
+        label(for='searchDiagonal') Allow diagonal movement?
+        input#searchDiagonal(type='checkbox', name='searchDiagonal')
+        br
+        label(for='checkClosest') Closest node if target unreachable?
+        input#checkClosest(type='checkbox', name='checkClosest')
+        br
+        label(for='generateWeights') Add random weights?
+        input#generateWeights(type='checkbox', name='generateWeights')
+        br
+        label(for='displayWeights') Display weight values?
+        input#displayWeights(type='checkbox', name='displayWeights')
+        br
+        input#btnGenerate(type='button', value='Generate New Map')
+        fieldset#weightsKey
+          legend Key:
+          div
+            span#keyWeight3.grid_item.weight1(style='width: 14.25px; height: 14.25px; margin-right: 6px;')
+            |  Weight of 1
+          div
+            span#keyWeight3.grid_item.weight3(style='width: 14.25px; height: 14.25px; margin-right: 6px;')
+            |  Weight of 3
+          div
+            span#keyWeight3.grid_item.weight5(style='width: 14.25px; height: 14.25px; margin-right: 6px;')
+            |  Weight of 5
+          div
+            span#keyWall.grid_item.wall(style='width: 14.25px; height: 14.25px; margin-right: 6px;')
+            |  Wall (imapassable)
+        br
+        span#message Click on a grid position to search
+    #main
+      #search-grid
+        canvas#canvas(width='500px' height="500px")
+    #footer
