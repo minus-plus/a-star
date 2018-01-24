@@ -84,8 +84,22 @@ var _Graph2 = _interopRequireDefault(_Graph);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function generateMatrix(row) {
+  var result = [];
+  for (var i = 0; i < row; i++) {
+    result[i] = [];
+    for (var j = 0; j < row; j++) {
+      if (Math.random() < p) {
+        result[i][j] = 1;
+      } else {
+        result[i][j] = 0;
+      }
+    }
+  }
+  return result;
+}
+
 function drawRect(ctx, x, y, w, h, r, color) {
-  console.log("drawing " + color);
   color = color || "#e3e3e3";
   ctx.beginPath();
   ctx.moveTo(x, y + r);
@@ -101,27 +115,64 @@ function drawRect(ctx, x, y, w, h, r, color) {
   ctx.fill();
 }
 
+function generateRandomWall(row) {
+  var p = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0.25;
+
+  var result = [];
+  for (var i = 0; i < row; i++) {
+    for (var j = 0; j < row; j++) {
+      if (Math.random() < p) {
+        result.push([i, j]);
+      }
+    }
+  }
+  return result;
+}
+
 (0, _domready2.default)(function () {
+
+  var row = 20;
+  var width = 800 / row;
+  var lineWith = 1;
+  var w = width - lineWith * 2;
+  var r = ~~((width - lineWith * 2) / 3);
   var canvas = document.getElementById("canvas");
   var ctx = canvas.getContext('2d');
-  // drawRect(ctx, 1,1, 23, 23, 8);
-  for (var i = 0; i < 20; i++) {
-    for (var j = 0; j < 20; j++) {
-      var x = i * 25 + 1;
-      var y = j * 25 + 1;
-      drawRect(ctx, x, y, 23, 23, 8);
+  var wall = generateRandomWall(row, 0.2);
+
+  var selected = [];
+  for (var i = 0; i < row; i++) {
+    for (var j = 0; j < row; j++) {
+      var x = i * width + lineWith;
+      var y = j * width + lineWith;
+      drawRect(ctx, x, y, w, w, r);
     }
   }
 
+  wall.map(function (p) {
+    console.log(p[0], p[1]);
+    drawRect(ctx, p[0] * width + lineWith, p[1] * width + lineWith, w, w, r, '#000000');
+  });
+
   canvas.addEventListener('click', function (event) {
+    // do, check new start and goal, check
     var rect = canvas.getBoundingClientRect();
     var x = event.clientX - rect.left;
     var y = event.clientY - rect.top;
 
-    var index_x = ~~(x / 25);
-    var index_y = ~~(y / 25);
+    var index_x = ~~(x / width);
+    var index_y = ~~(y / width);
+
+    if (selected.length < 2) {
+      selected.push([index_x, index_y]);
+    } else {
+      var _p = selected.shift();
+      console.log(_p);
+      drawRect(ctx, _p[0] * width + 1, _p[1] * width + 1, w, w, r, "#e3e3e3");
+      selected.push([index_x, index_y]);
+    }
     // go to the index and draw with another color
-    drawRect(ctx, index_x * 25 + 1, index_y * 25 + 1, 23, 23, 8, "#42f4c8");
+    drawRect(ctx, index_x * width + 1, index_y * width + 1, w, w, r, "#42f4c8");
   }, false);
 });
 
