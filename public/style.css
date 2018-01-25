@@ -5,6 +5,9 @@ body {
   line-height: 1;
   color: #000;
   background: #fff;
+  width: 100%;
+  height: 100%;
+  overhiden: auto;
 }
 nav {
   background: #e3e3e3;
