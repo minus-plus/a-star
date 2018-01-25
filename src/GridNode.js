@@ -23,7 +23,6 @@ class GridNode {
   }
 
   reset() {
-
     this.g = 100000;
     this.h = 0;
     this.f = this.g + this.h;

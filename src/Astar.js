@@ -22,21 +22,21 @@ class Astar {
       let curr = openList.poll();
       if (curr === end) {
         // success
-        console.log("found goal", start, end)
         return this.getPath(end);
       }
       curr.colsed = true;
-
+      // console.log("==============")
+      // console.log("[", curr.x, curr.y, "]", curr.g, curr.h, curr.f);
+      // console.log("--------------")
       // expanding
       let neighbors = graph.getNeighbors(curr);
-      console.log();
-      console.log(curr.x, curr.y)
-      console.log("----------");
       for (let i = 0; i < neighbors.length; i++) {
 
         let neighbor = neighbors[i];
-        if (neighbor.colsed || neighbor.isObstacle()) {
-          // skip, do nothing
+        if (neighbor.colsed || (neighbor.isObstacle())) {
+          if (!neighbor.closed) {
+            // console.log(neighbor.colsed || (neighbor.isObstacle()),neighbor.isObstacle(), neighbor.weight === 0)
+          }
           continue;
         }
 
@@ -50,7 +50,6 @@ class Astar {
           neighbor.f = neighbor.g + neighbor.h;
           graph.markDirty(neighbor);
           // if neighbor not in openList, add it
-
           if (!visited) {
             // expand this neighbor
             openList.offer(neighbor);
@@ -59,10 +58,11 @@ class Astar {
             openList.decreaseKey(neighbor)
           }
         }
-        console.log(neighbor.x, neighbor.y, neighbor.g, neighbor.h, neighbor.f);
+
+        // console.log("[", neighbor.x, neighbor.y, "]", neighbor.g, neighbor.h, neighbor.f);
       }
     }
-
+    console.log("can not reach the goal");
     return [];
 
   }

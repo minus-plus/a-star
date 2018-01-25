@@ -5,7 +5,11 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon server.js"
+    "dev": "npm-run-all --parallel dev:*",
+    "dev:stylus": "stylus -w ./stylus/index.styl -o ./public/style.css",
+    "dev:build": "webpack --watch",
+    "dev:server": "nodemon server.js"
+
   },
   "author": "minus <yunwang010@gmail.com>",
   "license": "MIT",

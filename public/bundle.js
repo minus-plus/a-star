@@ -109,11 +109,29 @@ var Graph = function () {
   }
 
   _createClass(Graph, [{
+    key: "valid",
+    value: function valid(node) {
+      if (node.visited || node.closed || node.g !== 100000 || node.f !== node.g || node.h !== 0) {
+        console.log("wrong");
+      }
+    }
+  }, {
     key: "init",
     value: function init() {
       this.dirtyNodes = [];
       for (var i = 0; i < this.nodes.length; i++) {
         this.nodes[i].reset();
+      }
+    }
+  }, {
+    key: "reset",
+    value: function reset() {
+      for (var i = 0; i < this.grid.length; i++) {
+        for (var j = 0; j < this.grid.length; j++) {
+          var prevW = this.grid[i][j].weight;
+          this.grid[i][j].reset();
+          console.log(this.grid[i][j].weight, prevW);
+        }
       }
     }
   }, {
@@ -141,41 +159,41 @@ var Graph = function () {
       }
 
       // East
-      if (this.grid[x + 1] && grid[x + 1][y]) {
+      if (this.grid[x + 1] && this.grid[x + 1][y]) {
         result.push(grid[x + 1][y]);
       }
 
       // South
-      if (this.grid[x] && grid[x][y - 1]) {
-        result.push(grid[x][y - 1]);
+      if (this.grid[x] && this.grid[x][y - 1]) {
+        result.push(this.grid[x][y - 1]);
       }
 
       // North
-      if (this.grid[x] && grid[x][y + 1]) {
-        result.push(grid[x][y + 1]);
+      if (this.grid[x] && this.grid[x][y + 1]) {
+        result.push(this.grid[x][y + 1]);
       }
 
       if (this.diagonal) {
         // Southwest
-        if (this.grid[x - 1] && grid[x - 1][y - 1]) {
-          result.push(grid[x - 1][y - 1]);
+        if (this.grid[x - 1] && this.grid[x - 1][y - 1]) {
+          result.push(this.grid[x - 1][y - 1]);
         }
 
         // Southeast
-        if (this.grid[x + 1] && grid[x + 1][y - 1]) {
-          result.push(grid[x + 1][y - 1]);
+        if (this.grid[x + 1] && this.grid[x + 1][y - 1]) {
+          result.push(this.grid[x + 1][y - 1]);
         }
 
         // Northwest
-        if (this.grid[x - 1] && grid[x - 1][y + 1]) {
-          result.push(grid[x - 1][y + 1]);
+        if (this.grid[x - 1] && this.grid[x - 1][y + 1]) {
+          result.push(this.grid[x - 1][y + 1]);
         }
 
         // Northeast
 
-        if (this.grid[x + 1] && grid[x + 1][y + 1]) {
+        if (this.grid[x + 1] && this.grid[x + 1][y + 1]) {
 
-          result.push(grid[x + 1][y + 1]);
+          result.push(this.grid[x + 1][y + 1]);
         }
       }
       return result;
@@ -256,21 +274,21 @@ var Astar = function () {
         var curr = openList.poll();
         if (curr === end) {
           // success
-          console.log("found goal", start, end);
           return this.getPath(end);
         }
         curr.colsed = true;
-
+        // console.log("==============")
+        // console.log("[", curr.x, curr.y, "]", curr.g, curr.h, curr.f);
+        // console.log("--------------")
         // expanding
         var neighbors = graph.getNeighbors(curr);
-        console.log();
-        console.log(curr.x, curr.y);
-        console.log("----------");
         for (var i = 0; i < neighbors.length; i++) {
 
           var neighbor = neighbors[i];
           if (neighbor.colsed || neighbor.isObstacle()) {
-            // skip, do nothing
+            if (!neighbor.closed) {
+              // console.log(neighbor.colsed || (neighbor.isObstacle()),neighbor.isObstacle(), neighbor.weight === 0)
+            }
             continue;
           }
 
@@ -284,7 +302,6 @@ var Astar = function () {
             neighbor.f = neighbor.g + neighbor.h;
             graph.markDirty(neighbor);
             // if neighbor not in openList, add it
-
             if (!visited) {
               // expand this neighbor
               openList.offer(neighbor);
@@ -293,10 +310,11 @@ var Astar = function () {
               openList.decreaseKey(neighbor);
             }
           }
-          console.log(neighbor.x, neighbor.y, neighbor.g, neighbor.h, neighbor.f);
+
+          // console.log("[", neighbor.x, neighbor.y, "]", neighbor.g, neighbor.h, neighbor.f);
         }
       }
-
+      console.log("can not reach the goal");
       return [];
     }
   }, {
@@ -370,20 +388,31 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 (0, _domready2.default)(function () {
 
   var row = 20;
-  var width = 800 / row;
+  var width = 640 / row;
   var lineWith = 1;
   var w = width - lineWith * 2;
   var r = ~~((width - lineWith * 2) / 3);
+  var p = 0.2;
+
+  var defaultColor = "#e3e3e3";
 
   var canvas = document.getElementById("canvas");
   var searchBtn = document.getElementById('search');
+  var resetBtn = document.getElementById('reset');
+  var frequency = document.getElementById('frequency');
+  var gridSize = document.getElementById('gridSize');
   var option = {
     canvas: canvas,
     searchBtn: searchBtn,
+    resetBtn: resetBtn,
+    frequency: frequency,
+    gridSize: gridSize,
     row: row,
     width: width,
     lineWith: lineWith,
     r: r,
+    p: p,
+    defaultColor: defaultColor,
     diagonal: false
   };
 
@@ -591,7 +620,6 @@ var GridNode = function () {
   }, {
     key: 'reset',
     value: function reset() {
-
       this.g = 100000;
       this.h = 0;
       this.f = this.g + this.h;
@@ -697,12 +725,18 @@ var GraphSearch = function () {
     this.lineWith = option.lineWith;
     this.r = option.r;
     this.w = this.width - this.lineWith * 2;
+    this.p = option.p;
     this.canvas = option.canvas;
     this.ctx = option.canvas.getContext('2d');
     this.searchBtn = option.searchBtn;
+    this.resetBtn = option.resetBtn;
+    this.gridSize = option.gridSize;
+    this.frequency = option.frequency;
+    this.defaultColor = option.defaultColor;
 
     this.init = this.init.bind(this);
     this.search = this.search.bind(this);
+    this.prevPath = [];
 
     this.init();
     this.bindEventListner();
@@ -711,9 +745,26 @@ var GraphSearch = function () {
   _createClass(GraphSearch, [{
     key: 'init',
     value: function init() {
-      this.matrix = this.constructor.generateMatrix(this.row);
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      this.resetDimensions();
+      this.start = null;
+      this.end = null;
+      this.prevPath = [];
+      this.matrix = this.constructor.generateMatrix(this.row, this.p);
       this.graph = new _Graph2.default(this.matrix, { diagonal: this.diagonal });
       this.draw();
+    }
+  }, {
+    key: 'drawByIndex',
+    value: function drawByIndex(x, y, color) {
+
+      var width = this.width;
+      var w = this.w;
+      var r = this.r;
+      var ctx = this.ctx;
+      var lineWidth = this.lineWith;
+
+      this.constructor.drawRect(ctx, x * width + lineWidth, y * width + lineWidth, w, w, r, color);
     }
   }, {
     key: 'bindEventListner',
@@ -730,13 +781,43 @@ var GraphSearch = function () {
 
       this.searchBtn.addEventListener('click', function (event) {
         var path = _this.search();
+        console.log(_this.start, _this.end);
         console.log(path);
-      });
+        if (path.length) {
+          for (var i = 0; i < path.length - 1; i++) {
+            var node = path[i];
+            _this.drawByIndex(node.x, node.y, "#ed904e");
+          }
+        }
+      }, false);
+
+      this.resetBtn.addEventListener('click', function (event) {
+        console.log("reset");
+        _this.init();
+      }, false);
+    }
+  }, {
+    key: 'resetDimensions',
+    value: function resetDimensions() {
+      this.p = +this.frequency.value || this.p;
+      this.row = +this.gridSize.value || this.row;
+      this.width = 640 / this.row;
+      this.w = this.width - this.lineWith * 2;
+      this.r = ~~((this.width - this.lineWith * 2) / 3);
     }
   }, {
     key: 'reset',
     value: function reset() {
-      this.graph = this.init();
+      this.init();
+    }
+  }, {
+    key: 'clearPrevPath',
+    value: function clearPrevPath() {
+      for (var i = 0; i < this.prevPath.length - 1; i++) {
+        var node = this.prevPath[i];
+        this.drawByIndex(node.x, node.y, "#e3e3e3");
+      }
+      this.prevPath = [];
     }
   }, {
     key: 'updateDes',
@@ -747,16 +828,19 @@ var GraphSearch = function () {
       var w = this.w;
       var node = this.graph.getNode(point);
       if (!node.isObstacle()) {
-        this.constructor.drawRect(this.ctx, point[0] * width + lineWith, point[1] * width + lineWith, w, w, r, "#42f4c8");
         if (this.end) {
           var temp = this.start;
           this.start = this.end;
           this.end = node;
-          this.constructor.drawRect(this.ctx, temp.x * width + lineWith, temp.y * width + lineWith, w, w, r, "#e3e3e3");
+          this.drawByIndex(this.start.x, this.start.y, "#42f4c8");
+          this.drawByIndex(this.end.x, this.end.y, "#ed4d95");
+          this.drawByIndex(temp.x, temp.y, "#e3e3e3");
         } else if (this.start) {
           this.end = node;
+          this.drawByIndex(point[0], point[1], "#ed4d95");
         } else {
           this.start = node;
+          this.drawByIndex(point[0], point[1], "#42f4c8");
         }
       }
     }
@@ -772,7 +856,7 @@ var GraphSearch = function () {
           if (this.matrix[i][j] === 1) {
             this.constructor.drawRect(this.ctx, i * width + 1, j * width + 1, w, w, r);
           } else {
-            this.constructor.drawRect(this.ctx, i * width + lineWith, j * width + lineWith, w, w, r, "#000000");
+            this.constructor.drawRect(this.ctx, i * width + lineWith, j * width + lineWith, w, w, r, "#333333");
           }
         }
       }
@@ -780,8 +864,11 @@ var GraphSearch = function () {
   }, {
     key: 'search',
     value: function search() {
-      var path = _Astar2.default.search(this.graph, this.start, this.end);
-      return path;
+      // clear previous result
+      if (this.start && this.end) {
+        this.prevPath = _Astar2.default.search(this.graph, this.start, this.end);
+        return this.prevPath;
+      }
     }
   }]);
 

@@ -48,21 +48,43 @@ class GraphSearch {
     this.lineWith = option.lineWith;
     this.r = option.r;
     this.w = this.width - this.lineWith * 2;
+    this.p = option.p;
     this.canvas = option.canvas;
     this.ctx = option.canvas.getContext('2d');
     this.searchBtn = option.searchBtn;
+    this.resetBtn = option.resetBtn;
+    this.gridSize = option.gridSize;
+    this.frequency = option.frequency;
+    this.defaultColor = option.defaultColor;
 
     this.init = this.init.bind(this);
     this.search = this.search.bind(this);
+    this.prevPath = [];
 
     this.init();
     this.bindEventListner();
   }
 
   init() {
-    this.matrix = this.constructor.generateMatrix(this.row);
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.resetDimensions();
+    this.start = null;
+    this.end = null;
+    this.prevPath = [];
+    this.matrix = this.constructor.generateMatrix(this.row, this.p);
     this.graph = new Graph(this.matrix, {diagonal: this.diagonal});
     this.draw();
+  }
+
+  drawByIndex(x, y, color) {
+
+    let width = this.width;
+    let w = this.w;
+    let r = this.r;
+    let ctx = this.ctx;
+    let lineWidth = this.lineWith;
+
+    this.constructor.drawRect(ctx, x * width + lineWidth, y * width + lineWidth, w, w, r, color);
   }
 
   bindEventListner() {
@@ -76,14 +98,42 @@ class GraphSearch {
 
     this.searchBtn.addEventListener('click', (event) => {
       let path = this.search();
+      console.log(this.start, this.end);
       console.log(path);
-    })
+      if (path.length) {
+        for (let i = 0; i < path.length - 1; i++ ) {
+          let node = path[i];
+          this.drawByIndex(node.x, node.y, "#ed904e")
+        }
+      }
+    }, false);
 
+    this.resetBtn.addEventListener('click', (event) => {
+      console.log("reset");
+      this.init();
+    }, false);
+  }
+
+  resetDimensions() {
+    this.p = +(this.frequency.value) || this.p;
+    this.row = +(this.gridSize.value) || this.row;
+    this.width = 640 / this.row;
+    this.w = this.width - this.lineWith * 2;
+    this.r = ~~((this.width - this.lineWith * 2) / 3);
   }
 
   reset() {
-    this.graph = this.init();
+    this.init();
   }
+
+  clearPrevPath() {
+    for (let i = 0; i < this.prevPath.length - 1; i++) {
+      let node = this.prevPath[i];
+      this.drawByIndex(node.x, node.y, "#e3e3e3");
+    }
+    this.prevPath = [];
+  }
+
 
   updateDes(point) {
     let width = this.width;
@@ -92,16 +142,19 @@ class GraphSearch {
     let w = this.w;
     const node = this.graph.getNode(point);
     if (!node.isObstacle()) {
-      this.constructor.drawRect(this.ctx, point[0] * width + lineWith, point[1] * width + lineWith, w, w, r, "#42f4c8");
       if (this.end) {
         let temp = this.start;
         this.start = this.end;
         this.end = node;
-        this.constructor.drawRect(this.ctx, temp.x * width + lineWith, temp.y * width + lineWith, w, w, r, "#e3e3e3");
+        this.drawByIndex(this.start.x, this.start.y, "#42f4c8");
+        this.drawByIndex(this.end.x, this.end.y, "#ed4d95");
+        this.drawByIndex(temp.x, temp.y, "#e3e3e3");
       } else if(this.start) {
         this.end = node;
+        this.drawByIndex(point[0], point[1], "#ed4d95")
       } else  {
         this.start = node;
+        this.drawByIndex(point[0], point[1], "#42f4c8");
       }
     }
   }
@@ -116,15 +169,18 @@ class GraphSearch {
         if (this.matrix[i][j] === 1) {
           this.constructor.drawRect(this.ctx, i * width + 1, j * width + 1, w , w, r);
         } else {
-          this.constructor.drawRect(this.ctx, i * width + lineWith, j * width + lineWith, w , w, r, "#000000");
+          this.constructor.drawRect(this.ctx, i * width + lineWith, j * width + lineWith, w , w, r, "#333333");
         }
       }
     }
   }
 
   search() {
-    let path = Astar.search(this.graph, this.start, this.end);
-    return path;
+    // clear previous result
+    if (this.start && this.end) {
+      this.prevPath = Astar.search(this.graph, this.start, this.end);
+      return this.prevPath;
+    }
   }
 
 }

@@ -11,20 +11,31 @@ import GraphSearch from './GraphSearch'
 domready(function() {
 
   let row = 20;
-  let width = 800 / row;
+  let width = 640 / row;
   let lineWith = 1;
   let w = width - lineWith * 2;
   let r = ~~((width - lineWith * 2) / 3);
+  let p = 0.2;
+
+  const defaultColor = "#e3e3e3";
 
   const canvas = document.getElementById("canvas");
-  const searchBtn = document.getElementById('search')
+  const searchBtn = document.getElementById('search');
+  const resetBtn = document.getElementById('reset');
+  const frequency = document.getElementById('frequency');
+  const gridSize = document.getElementById('gridSize');
   const option = {
     canvas,
     searchBtn,
+    resetBtn,
+    frequency,
+    gridSize,
     row,
     width,
     lineWith,
     r,
+    p,
+    defaultColor,
     diagonal: false
   };
 

@@ -20,12 +20,29 @@ class Graph {
     this.init();
   }
 
+  valid(node) {
+    if (node.visited || node.closed || node.g !== 100000 || node.f !== node.g || node.h !== 0) {
+      console.log("wrong");
+    }
+  }
+
   init() {
     this.dirtyNodes = [];
     for (let i = 0; i < this.nodes.length; i++) {
       this.nodes[i].reset();
     }
   }
+
+  reset() {
+    for (let i = 0; i < this.grid.length; i++) {
+      for (let j = 0; j < this.grid.length; j++) {
+        let prevW = this.grid[i][j].weight;
+        this.grid[i][j].reset();
+        console.log(this.grid[i][j].weight, prevW);
+      }
+    }
+  }
+
 
   cleanDirty() {
     for (let i = 0; i < this.dirtyNodes.length; i++) {
@@ -48,41 +65,41 @@ class Graph {
     }
 
     // East
-    if (this.grid[x + 1] && grid[x + 1][y]) {
+    if (this.grid[x + 1] && this.grid[x + 1][y]) {
       result.push(grid[x + 1][y]);
     }
 
     // South
-    if (this.grid[x] && grid[x][y - 1]) {
-      result.push(grid[x][y - 1]);
+    if (this.grid[x] && this.grid[x][y - 1]) {
+      result.push(this.grid[x][y - 1]);
     }
 
     // North
-    if (this.grid[x] && grid[x][y + 1]) {
-      result.push(grid[x][y + 1]);
+    if (this.grid[x] && this.grid[x][y + 1]) {
+      result.push(this.grid[x][y + 1]);
     }
 
     if (this.diagonal) {
       // Southwest
-      if (this.grid[x - 1] && grid[x - 1][y - 1]) {
-        result.push(grid[x - 1][y - 1]);
+      if (this.grid[x - 1] && this.grid[x - 1][y - 1]) {
+        result.push(this.grid[x - 1][y - 1]);
       }
 
       // Southeast
-      if (this.grid[x + 1] && grid[x + 1][y - 1]) {
-        result.push(grid[x + 1][y - 1]);
+      if (this.grid[x + 1] && this.grid[x + 1][y - 1]) {
+        result.push(this.grid[x + 1][y - 1]);
       }
 
       // Northwest
-      if (this.grid[x - 1] && grid[x - 1][y + 1]) {
-        result.push(grid[x - 1][y + 1]);
+      if (this.grid[x - 1] && this.grid[x - 1][y + 1]) {
+        result.push(this.grid[x - 1][y + 1]);
       }
 
       // Northeast
 
-      if (this.grid[x + 1] && grid[x + 1][y + 1]) {
+      if (this.grid[x + 1] && this.grid[x + 1][y + 1]) {
 
-        result.push(grid[x + 1][y + 1]);
+        result.push(this.grid[x + 1][y + 1]);
       }
     }
     return result;
