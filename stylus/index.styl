@@ -1,18 +1,62 @@
 body
   margin: 0 auto
-  height: 100%
-  width: 100%
   overflow: hidden
   font-family: 'Open Sans', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'
   line-height: 1
   color: #000
   background: #fff
 
-
+nav
+  background: #e3e3e3
+  font-size: 36px
+  padding: 20px 40px
+  
 #main
-  width: 100%
-  height: 100%
+  display: flex
+  width: 1024px
+  margin: 0 auto
 
   #search-grid
     position: relative
     margin: 40px
+
+  #config
+    margin: auto
+    margin-left: 40px
+    width: 250px
+
+    #parameters
+      color: 'white'
+      font-family: "Arial"
+      font-size: 18px
+      .param
+        padding-bottom: 10px
+      label
+        width: 100px
+      select
+        font-size: 18px
+      option
+        font-size: 18px
+    #controls
+      padding-top: 40px
+      color: 'white'
+      font-family: "Arial"
+      font-size: 24px
+
+      #search,
+      #reset
+        border: 3px solid black
+        display: inline-block
+        width: 100px
+        text-align: center
+        padding: 5px
+        cursor: pointer
+
+        &:hover
+          color: white
+          background-color: #3385ff
+          border-color:  #3385ff
+
+
+      #reset
+        margin-left: 10px
