@@ -9,31 +9,37 @@ class Astar {
   }
 
   static search(graph, start, end, options = {}) {
-    const heuristic = options.heuristic;
-    let openList = new Heap(function(node1, node2){
+    const heuristic = options.heuristic || Astar.manhattan;
+    let openList = new MinHeap(function(node1, node2){
       return node1.f - node2.f;
     });
     let closeList = {}; // a set
-
-    openList.push(start);
+    start.g = 0;
+    openList.offer(start);
     graph.markDirty(start);
 
     while (openList.size() > 0) {
-      let curr = openList.pop();
+      let curr = openList.poll();
       if (curr === end) {
         // success
+        console.log("found goal", start, end)
         return this.getPath(end);
       }
       curr.colsed = true;
 
       // expanding
       let neighbors = graph.getNeighbors(curr);
+      console.log();
+      console.log(curr.x, curr.y)
+      console.log("----------");
       for (let i = 0; i < neighbors.length; i++) {
+
         let neighbor = neighbors[i];
         if (neighbor.colsed || neighbor.isObstacle()) {
           // skip, do nothing
           continue;
         }
+
         let newG = curr.g + neighbor.getCost(curr);
         let visited = neighbor.visited;
         if (!visited || newG < neighbor.g) {
@@ -53,6 +59,7 @@ class Astar {
             openList.decreaseKey(neighbor)
           }
         }
+        console.log(neighbor.x, neighbor.y, neighbor.g, neighbor.h, neighbor.f);
       }
     }
 
@@ -73,9 +80,10 @@ class Astar {
   }
 
   static cleanNode(node) {
-    node.f = 0;
-    node.g = 0;
+
+    node.g = 100000;
     node.h = 0;
+    node.f = this.g + this.h;
     node.visited = false;
     node.closed = false;
     node.parant = null;
@@ -85,7 +93,7 @@ class Astar {
     let curr = node;
     let path = [];
     while (curr.parent) {
-      path.unshift(node);
+      path.unshift(curr);
       curr = curr.parent;
     }
     return path;

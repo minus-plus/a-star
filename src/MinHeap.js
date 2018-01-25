@@ -9,7 +9,7 @@ class MinHeap {
 
   offer(element) {
     this.list.push(element);
-    // percolate up
+    // bubble up
     this.bubbleUp(this.list.length - 1);
   }
 
@@ -31,25 +31,26 @@ class MinHeap {
   bubbleUp(index) {
     const element = this.list[index];
     while (index > 0) {
-      const parentIndex = ((n -1) >> 1);
+      const parentIndex = ((index -1) >> 1);
       const parent = this.list[parentIndex];
       if (this.cmp(element, parent) < 0) {
-        this.list[parentIndex] = element;
+        this.list[index] = parent;
         index = parentIndex;
       } else {
         break;
       }
     }
     this.list[index] = element;
+
   }
 
   percolateDown(index) {
     const element = this.list[index];
 
-    while (2 * index + 1 < this.length) {
+    while (2 * index + 1 < this.list.length) {
       const child1 = 2 * index + 1;
       const child2 = child1 + 1;
-      const smaller = (child2 >= this.length || this.cmp(this.list[child1], this.list[child2]) <= 0) ? child1 : child2;
+      const smaller = (child2 >= this.list.length || this.cmp(this.list[child1], this.list[child2]) <= 0) ? child1 : child2;
 
       if (this.cmp(element, this.list[smaller]) > 0) {
         this.list[index] = this.list[smaller];
@@ -81,5 +82,11 @@ class MinHeap {
     return this.list.length;
   }
 
+  toString() {
+    return this.list.join(', ');
+  }
 
 }
+
+
+export default MinHeap;

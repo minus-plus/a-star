@@ -23,7 +23,7 @@ class Graph {
   init() {
     this.dirtyNodes = [];
     for (let i = 0; i < this.nodes.length; i++) {
-      astar.cleanNode(this.nodes[i]);
+      this.nodes[i].reset();
     }
   }
 
@@ -35,10 +35,11 @@ class Graph {
   }
 
   markDirty(node) {
-    this.dirtyNode.push(node);
+    this.dirtyNodes.push(node);
   }
 
   getNeighbors(node) {
+    let grid = this.grid;
     let result = [];
     let x = node.x;
     let y = node.y;
@@ -85,6 +86,10 @@ class Graph {
       }
     }
     return result;
+  }
+
+  getNode(point) {
+    return this.grid[point[0]][point[1]];
   }
 
   toString() {

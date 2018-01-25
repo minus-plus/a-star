@@ -60,251 +60,11 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 0);
+/******/ 	return __webpack_require__(__webpack_require__.s = 2);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var _domready = __webpack_require__(4);
-
-var _domready2 = _interopRequireDefault(_domready);
-
-var _Astar = __webpack_require__(1);
-
-var _Astar2 = _interopRequireDefault(_Astar);
-
-var _Graph = __webpack_require__(2);
-
-var _Graph2 = _interopRequireDefault(_Graph);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function generateMatrix(row) {
-  var result = [];
-  for (var i = 0; i < row; i++) {
-    result[i] = [];
-    for (var j = 0; j < row; j++) {
-      if (Math.random() < p) {
-        result[i][j] = 1;
-      } else {
-        result[i][j] = 0;
-      }
-    }
-  }
-  return result;
-}
-
-function drawRect(ctx, x, y, w, h, r, color) {
-  color = color || "#e3e3e3";
-  ctx.beginPath();
-  ctx.moveTo(x, y + r);
-  ctx.lineTo(x, y + h - r);
-  ctx.arcTo(x, y + h, x + r, y + h, r);
-  ctx.lineTo(x + w - r, y + h);
-  ctx.arcTo(x + w, y + h, x + w, y + h - r, r);
-  ctx.lineTo(x + w, y + r);
-  ctx.arcTo(x + w, y, x + w - r, y, r);
-  ctx.lineTo(x + r, y);
-  ctx.arcTo(x, y, x, y + r, r);
-  ctx.fillStyle = color;
-  ctx.fill();
-}
-
-function generateRandomWall(row) {
-  var p = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0.25;
-
-  var result = [];
-  for (var i = 0; i < row; i++) {
-    for (var j = 0; j < row; j++) {
-      if (Math.random() < p) {
-        result.push([i, j]);
-      }
-    }
-  }
-  return result;
-}
-
-(0, _domready2.default)(function () {
-
-  var row = 20;
-  var width = 800 / row;
-  var lineWith = 1;
-  var w = width - lineWith * 2;
-  var r = ~~((width - lineWith * 2) / 3);
-  var canvas = document.getElementById("canvas");
-  var ctx = canvas.getContext('2d');
-  var wall = generateRandomWall(row, 0.2);
-
-  var selected = [];
-  for (var i = 0; i < row; i++) {
-    for (var j = 0; j < row; j++) {
-      var x = i * width + lineWith;
-      var y = j * width + lineWith;
-      drawRect(ctx, x, y, w, w, r);
-    }
-  }
-
-  wall.map(function (p) {
-    console.log(p[0], p[1]);
-    drawRect(ctx, p[0] * width + lineWith, p[1] * width + lineWith, w, w, r, '#000000');
-  });
-
-  canvas.addEventListener('click', function (event) {
-    // do, check new start and goal, check
-    var rect = canvas.getBoundingClientRect();
-    var x = event.clientX - rect.left;
-    var y = event.clientY - rect.top;
-
-    var index_x = ~~(x / width);
-    var index_y = ~~(y / width);
-
-    if (selected.length < 2) {
-      selected.push([index_x, index_y]);
-    } else {
-      var _p = selected.shift();
-      console.log(_p);
-      drawRect(ctx, _p[0] * width + 1, _p[1] * width + 1, w, w, r, "#e3e3e3");
-      selected.push([index_x, index_y]);
-    }
-    // go to the index and draw with another color
-    drawRect(ctx, index_x * width + 1, index_y * width + 1, w, w, r, "#42f4c8");
-  }, false);
-});
-
-/***/ }),
-/* 1 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); // src/Astar.js
-
-
-var _MinHeap = __webpack_require__(6);
-
-var _MinHeap2 = _interopRequireDefault(_MinHeap);
-
-var _Graph = __webpack_require__(2);
-
-var _Graph2 = _interopRequireDefault(_Graph);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Astar = function () {
-  function Astar() {
-    _classCallCheck(this, Astar);
-  }
-
-  _createClass(Astar, null, [{
-    key: 'search',
-    value: function search(graph, start, end) {
-      var options = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
-
-      var heuristic = options.heuristic;
-      var openList = new Heap(function (node1, node2) {
-        return node1.f - node2.f;
-      });
-      var closeList = {}; // a set
-
-      openList.push(start);
-      graph.markDirty(start);
-
-      while (openList.size() > 0) {
-        var curr = openList.pop();
-        if (curr === end) {
-          // success
-          return this.getPath(end);
-        }
-        curr.colsed = true;
-
-        // expanding
-        var neighbors = graph.getNeighbors(curr);
-        for (var i = 0; i < neighbors.length; i++) {
-          var neighbor = neighbors[i];
-          if (neighbor.colsed || neighbor.isObstacle()) {
-            // skip, do nothing
-            continue;
-          }
-          var newG = curr.g + neighbor.getCost(curr);
-          var visited = neighbor.visited;
-          if (!visited || newG < neighbor.g) {
-            neighbor.visited = true;
-            neighbor.g = newG;
-            neighbor.parent = curr;
-            neighbor.h = heuristic(neighbor, end);
-            neighbor.f = neighbor.g + neighbor.h;
-            graph.markDirty(neighbor);
-            // if neighbor not in openList, add it
-
-            if (!visited) {
-              // expand this neighbor
-              openList.offer(neighbor);
-            } else {
-              // decrease the key of neighbor
-              openList.decreaseKey(neighbor);
-            }
-          }
-        }
-      }
-
-      return [];
-    }
-  }, {
-    key: 'manhattan',
-    value: function manhattan(p1, p2) {
-      return Math.abs(p1.x - p2.x) + Math.abs(p1.y - p2.y);
-    }
-  }, {
-    key: 'diagonal',
-    value: function diagonal(p1, p2) {
-      var D = 1;
-      var D2 = Math.sqrt(2);
-      var d1 = Math.abs(pos1.x - pos0.x);
-      var d2 = Math.abs(pos1.y - pos0.y);
-      return D * (d1 + d2) + (D2 - 2 * D) * Math.min(d1, d2);
-    }
-  }, {
-    key: 'cleanNode',
-    value: function cleanNode(node) {
-      node.f = 0;
-      node.g = 0;
-      node.h = 0;
-      node.visited = false;
-      node.closed = false;
-      node.parant = null;
-    }
-  }, {
-    key: 'getPath',
-    value: function getPath(node) {
-      var curr = node;
-      var path = [];
-      while (curr.parent) {
-        path.unshift(node);
-        curr = curr.parent;
-      }
-      return path;
-    }
-  }]);
-
-  return Astar;
-}();
-
-exports.default = Astar;
-
-/***/ }),
-/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -317,7 +77,7 @@ Object.defineProperty(exports, "__esModule", {
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); // src/Graph.js
 
 
-var _GridNode = __webpack_require__(3);
+var _GridNode = __webpack_require__(5);
 
 var _GridNode2 = _interopRequireDefault(_GridNode);
 
@@ -353,7 +113,7 @@ var Graph = function () {
     value: function init() {
       this.dirtyNodes = [];
       for (var i = 0; i < this.nodes.length; i++) {
-        astar.cleanNode(this.nodes[i]);
+        this.nodes[i].reset();
       }
     }
   }, {
@@ -367,11 +127,12 @@ var Graph = function () {
   }, {
     key: "markDirty",
     value: function markDirty(node) {
-      this.dirtyNode.push(node);
+      this.dirtyNodes.push(node);
     }
   }, {
     key: "getNeighbors",
     value: function getNeighbors(node) {
+      var grid = this.grid;
       var result = [];
       var x = node.x;
       var y = node.y;
@@ -420,6 +181,11 @@ var Graph = function () {
       return result;
     }
   }, {
+    key: "getNode",
+    value: function getNode(point) {
+      return this.grid[point[0]][point[1]];
+    }
+  }, {
     key: "toString",
     value: function toString() {
       var graphString = [];
@@ -442,7 +208,7 @@ var Graph = function () {
 exports.default = Graph;
 
 /***/ }),
-/* 3 */
+/* 1 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -452,65 +218,180 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); // src/Astar.js
+
+
+var _MinHeap = __webpack_require__(4);
+
+var _MinHeap2 = _interopRequireDefault(_MinHeap);
+
+var _Graph = __webpack_require__(0);
+
+var _Graph2 = _interopRequireDefault(_Graph);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var GridNode = function () {
-  function GridNode(x, y, weight) {
-    _classCallCheck(this, GridNode);
-
-    this.x = x;
-    this.y = y;
-    this.weight = weight;
-
-    this.f = 0;
-    this.g = 0;
-    this.h = 0;
-    this.closed = false;
-    this.visited = false;
-    this.parent = null;
+var Astar = function () {
+  function Astar() {
+    _classCallCheck(this, Astar);
   }
 
-  _createClass(GridNode, [{
-    key: 'toString',
-    value: function toString() {
-      return '[' + this.x + ' ' + this.y + ']';
-    }
-  }, {
-    key: 'isObstable',
-    value: function isObstable() {
-      return this.weight === 1;
-    }
-  }, {
-    key: 'reset',
-    value: function reset() {
-      this.f = 0;
-      this.g = 0;
-      this.h = 0;
-      this.closed = false;
-      this.visited = false;
-      this.parent = null;
-    }
-  }, {
-    key: 'getCost',
-    value: function getCost(neighbor) {
-      // if current node and its neighbor are in diagonal
-      if (neighbor && this.x !== neighbor.x && this.y !== neighbor.y) {
-        return this.weight * 1.414;
-      } else {
-        return this.weight;
+  _createClass(Astar, null, [{
+    key: 'search',
+    value: function search(graph, start, end) {
+      var options = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
+
+      var heuristic = options.heuristic || Astar.manhattan;
+      var openList = new _MinHeap2.default(function (node1, node2) {
+        return node1.f - node2.f;
+      });
+      var closeList = {}; // a set
+      start.g = 0;
+      openList.offer(start);
+      graph.markDirty(start);
+
+      while (openList.size() > 0) {
+        var curr = openList.poll();
+        if (curr === end) {
+          // success
+          console.log("found goal", start, end);
+          return this.getPath(end);
+        }
+        curr.colsed = true;
+
+        // expanding
+        var neighbors = graph.getNeighbors(curr);
+        console.log();
+        console.log(curr.x, curr.y);
+        console.log("----------");
+        for (var i = 0; i < neighbors.length; i++) {
+
+          var neighbor = neighbors[i];
+          if (neighbor.colsed || neighbor.isObstacle()) {
+            // skip, do nothing
+            continue;
+          }
+
+          var newG = curr.g + neighbor.getCost(curr);
+          var visited = neighbor.visited;
+          if (!visited || newG < neighbor.g) {
+            neighbor.visited = true;
+            neighbor.g = newG;
+            neighbor.parent = curr;
+            neighbor.h = heuristic(neighbor, end);
+            neighbor.f = neighbor.g + neighbor.h;
+            graph.markDirty(neighbor);
+            // if neighbor not in openList, add it
+
+            if (!visited) {
+              // expand this neighbor
+              openList.offer(neighbor);
+            } else {
+              // decrease the key of neighbor
+              openList.decreaseKey(neighbor);
+            }
+          }
+          console.log(neighbor.x, neighbor.y, neighbor.g, neighbor.h, neighbor.f);
+        }
       }
+
+      return [];
+    }
+  }, {
+    key: 'manhattan',
+    value: function manhattan(p1, p2) {
+      return Math.abs(p1.x - p2.x) + Math.abs(p1.y - p2.y);
+    }
+  }, {
+    key: 'diagonal',
+    value: function diagonal(p1, p2) {
+      var D = 1;
+      var D2 = Math.sqrt(2);
+      var d1 = Math.abs(pos1.x - pos0.x);
+      var d2 = Math.abs(pos1.y - pos0.y);
+      return D * (d1 + d2) + (D2 - 2 * D) * Math.min(d1, d2);
+    }
+  }, {
+    key: 'cleanNode',
+    value: function cleanNode(node) {
+
+      node.g = 100000;
+      node.h = 0;
+      node.f = this.g + this.h;
+      node.visited = false;
+      node.closed = false;
+      node.parant = null;
+    }
+  }, {
+    key: 'getPath',
+    value: function getPath(node) {
+      var curr = node;
+      var path = [];
+      while (curr.parent) {
+        path.unshift(curr);
+        curr = curr.parent;
+      }
+      return path;
     }
   }]);
 
-  return GridNode;
+  return Astar;
 }();
 
-exports.default = GridNode;
+exports.default = Astar;
 
 /***/ }),
-/* 4 */
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _domready = __webpack_require__(3);
+
+var _domready2 = _interopRequireDefault(_domready);
+
+var _Astar = __webpack_require__(1);
+
+var _Astar2 = _interopRequireDefault(_Astar);
+
+var _Graph = __webpack_require__(0);
+
+var _Graph2 = _interopRequireDefault(_Graph);
+
+var _GraphSearch = __webpack_require__(6);
+
+var _GraphSearch2 = _interopRequireDefault(_GraphSearch);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+(0, _domready2.default)(function () {
+
+  var row = 20;
+  var width = 800 / row;
+  var lineWith = 1;
+  var w = width - lineWith * 2;
+  var r = ~~((width - lineWith * 2) / 3);
+
+  var canvas = document.getElementById("canvas");
+  var searchBtn = document.getElementById('search');
+  var option = {
+    canvas: canvas,
+    searchBtn: searchBtn,
+    row: row,
+    width: width,
+    lineWith: lineWith,
+    r: r,
+    diagonal: false
+  };
+
+  var graphSearch = new _GraphSearch2.default(option);
+});
+
+/***/ }),
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*!
@@ -546,12 +427,15 @@ exports.default = GridNode;
 
 
 /***/ }),
-/* 5 */,
-/* 6 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -569,14 +453,14 @@ var MinHeap = function () {
   }
 
   _createClass(MinHeap, [{
-    key: "offer",
+    key: 'offer',
     value: function offer(element) {
       this.list.push(element);
-      // percolate up
+      // bubble up
       this.bubbleUp(this.list.length - 1);
     }
   }, {
-    key: "poll",
+    key: 'poll',
     value: function poll() {
       var first = this.list[0];
       var last = this.list.pop();
@@ -588,19 +472,19 @@ var MinHeap = function () {
       return first;
     }
   }, {
-    key: "peek",
+    key: 'peek',
     value: function peek() {
       return this.list[0];
     }
   }, {
-    key: "bubbleUp",
+    key: 'bubbleUp',
     value: function bubbleUp(index) {
       var element = this.list[index];
       while (index > 0) {
-        var parentIndex = n - 1 >> 1;
+        var parentIndex = index - 1 >> 1;
         var parent = this.list[parentIndex];
         if (this.cmp(element, parent) < 0) {
-          this.list[parentIndex] = element;
+          this.list[index] = parent;
           index = parentIndex;
         } else {
           break;
@@ -609,14 +493,14 @@ var MinHeap = function () {
       this.list[index] = element;
     }
   }, {
-    key: "percolateDown",
+    key: 'percolateDown',
     value: function percolateDown(index) {
       var element = this.list[index];
 
-      while (2 * index + 1 < this.length) {
+      while (2 * index + 1 < this.list.length) {
         var child1 = 2 * index + 1;
         var child2 = child1 + 1;
-        var smaller = child2 >= this.length || this.cmp(this.list[child1], this.list[child2]) <= 0 ? child1 : child2;
+        var smaller = child2 >= this.list.length || this.cmp(this.list[child1], this.list[child2]) <= 0 ? child1 : child2;
 
         if (this.cmp(element, this.list[smaller]) > 0) {
           this.list[index] = this.list[smaller];
@@ -628,7 +512,7 @@ var MinHeap = function () {
       this.list[index] = element;
     }
   }, {
-    key: "decreaseKey",
+    key: 'decreaseKey',
     value: function decreaseKey(element) {
       // get index
       var index = this.getIndexOfElement(element);
@@ -637,7 +521,7 @@ var MinHeap = function () {
       }
     }
   }, {
-    key: "getIndexOfElement",
+    key: 'getIndexOfElement',
     value: function getIndexOfElement(element) {
       var i = void 0;
       for (i = 0; i < this.size(); i++) {
@@ -647,14 +531,264 @@ var MinHeap = function () {
       }
     }
   }, {
-    key: "size",
+    key: 'size',
     value: function size() {
       return this.list.length;
+    }
+  }, {
+    key: 'toString',
+    value: function toString() {
+      return this.list.join(', ');
     }
   }]);
 
   return MinHeap;
 }();
+
+exports.default = MinHeap;
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var GridNode = function () {
+  function GridNode(x, y, weight) {
+    _classCallCheck(this, GridNode);
+
+    this.x = x;
+    this.y = y;
+    this.weight = weight;
+
+    this.g = 100000;
+    this.h = 0;
+    this.f = this.g + this.h;
+    this.closed = false;
+    this.visited = false;
+    this.parent = null;
+  }
+
+  _createClass(GridNode, [{
+    key: 'toString',
+    value: function toString() {
+      return '[' + this.x + ' ' + this.y + ']';
+    }
+  }, {
+    key: 'isObstacle',
+    value: function isObstacle() {
+      return this.weight === 0;
+    }
+  }, {
+    key: 'reset',
+    value: function reset() {
+
+      this.g = 100000;
+      this.h = 0;
+      this.f = this.g + this.h;
+      this.closed = false;
+      this.visited = false;
+      this.parent = null;
+    }
+  }, {
+    key: 'getCost',
+    value: function getCost(neighbor) {
+      // if current node and its neighbor are in diagonal
+      if (neighbor && this.x !== neighbor.x && this.y !== neighbor.y) {
+        return this.weight * 1.414;
+      } else {
+        return this.weight;
+      }
+    }
+  }]);
+
+  return GridNode;
+}();
+
+exports.default = GridNode;
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Created by Yun on 1/24/2018.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
+
+
+var _Astar = __webpack_require__(1);
+
+var _Astar2 = _interopRequireDefault(_Astar);
+
+var _Graph = __webpack_require__(0);
+
+var _Graph2 = _interopRequireDefault(_Graph);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var GraphSearch = function () {
+  _createClass(GraphSearch, null, [{
+    key: 'generateMatrix',
+    value: function generateMatrix(row) {
+      var p = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0.2;
+
+      var result = [];
+      for (var i = 0; i < row; i++) {
+        result[i] = [];
+        for (var j = 0; j < row; j++) {
+          if (Math.random() < p) {
+            result[i][j] = 0;
+          } else {
+            result[i][j] = 1;
+          }
+        }
+      }
+      return result;
+    }
+  }, {
+    key: 'drawRect',
+    value: function drawRect(ctx, x, y, w, h, r, color) {
+      color = color || "#e3e3e3";
+      ctx.beginPath();
+      ctx.moveTo(x, y + r);
+      ctx.lineTo(x, y + h - r);
+      ctx.arcTo(x, y + h, x + r, y + h, r);
+      ctx.lineTo(x + w - r, y + h);
+      ctx.arcTo(x + w, y + h, x + w, y + h - r, r);
+      ctx.lineTo(x + w, y + r);
+      ctx.arcTo(x + w, y, x + w - r, y, r);
+      ctx.lineTo(x + r, y);
+      ctx.arcTo(x, y, x, y + r, r);
+      ctx.fillStyle = color;
+      ctx.fill();
+    }
+  }]);
+
+  function GraphSearch() {
+    var option = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+    _classCallCheck(this, GraphSearch);
+
+    if (!option.canvas) {
+      throw "No canvas found";
+    }
+    this.option = option;
+    this.diagonal = !!option.diagonal;
+    this.row = option.row;
+    this.width = option.width;
+    this.lineWith = option.lineWith;
+    this.r = option.r;
+    this.w = this.width - this.lineWith * 2;
+    this.canvas = option.canvas;
+    this.ctx = option.canvas.getContext('2d');
+    this.searchBtn = option.searchBtn;
+
+    this.init = this.init.bind(this);
+    this.search = this.search.bind(this);
+
+    this.init();
+    this.bindEventListner();
+  }
+
+  _createClass(GraphSearch, [{
+    key: 'init',
+    value: function init() {
+      this.matrix = this.constructor.generateMatrix(this.row);
+      this.graph = new _Graph2.default(this.matrix, { diagonal: this.diagonal });
+      this.draw();
+    }
+  }, {
+    key: 'bindEventListner',
+    value: function bindEventListner() {
+      var _this = this;
+
+      this.canvas.addEventListener('click', function (event) {
+        // do, check new start and goal, check
+        var rect = canvas.getBoundingClientRect();
+        var x = ~~((event.clientX - rect.left) / _this.width);
+        var y = ~~((event.clientY - rect.top) / _this.width);
+        _this.updateDes([x, y]);
+      }, false);
+
+      this.searchBtn.addEventListener('click', function (event) {
+        var path = _this.search();
+        console.log(path);
+      });
+    }
+  }, {
+    key: 'reset',
+    value: function reset() {
+      this.graph = this.init();
+    }
+  }, {
+    key: 'updateDes',
+    value: function updateDes(point) {
+      var width = this.width;
+      var lineWith = this.lineWith;
+      var r = this.r;
+      var w = this.w;
+      var node = this.graph.getNode(point);
+      if (!node.isObstacle()) {
+        this.constructor.drawRect(this.ctx, point[0] * width + lineWith, point[1] * width + lineWith, w, w, r, "#42f4c8");
+        if (this.end) {
+          var temp = this.start;
+          this.start = this.end;
+          this.end = node;
+          this.constructor.drawRect(this.ctx, temp.x * width + lineWith, temp.y * width + lineWith, w, w, r, "#e3e3e3");
+        } else if (this.start) {
+          this.end = node;
+        } else {
+          this.start = node;
+        }
+      }
+    }
+  }, {
+    key: 'draw',
+    value: function draw() {
+      var width = this.width;
+      var lineWith = this.lineWith;
+      var r = this.r;
+      var w = this.w;
+      for (var i = 0; i < this.row; i++) {
+        for (var j = 0; j < this.row; j++) {
+          if (this.matrix[i][j] === 1) {
+            this.constructor.drawRect(this.ctx, i * width + 1, j * width + 1, w, w, r);
+          } else {
+            this.constructor.drawRect(this.ctx, i * width + lineWith, j * width + lineWith, w, w, r, "#000000");
+          }
+        }
+      }
+    }
+  }, {
+    key: 'search',
+    value: function search() {
+      var path = _Astar2.default.search(this.graph, this.start, this.end);
+      return path;
+    }
+  }]);
+
+  return GraphSearch;
+}();
+
+exports.default = GraphSearch;
 
 /***/ })
 /******/ ]);
