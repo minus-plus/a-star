@@ -181,6 +181,8 @@ class GraphSearch {
       this.prevPath = Astar.search(this.graph, this.start, this.end);
       return this.prevPath;
     }
+
+    return [];
   }
 
 }
