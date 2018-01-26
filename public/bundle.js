@@ -869,6 +869,8 @@ var GraphSearch = function () {
         this.prevPath = _Astar2.default.search(this.graph, this.start, this.end);
         return this.prevPath;
       }
+
+      return [];
     }
   }]);
 
@@ -879,4 +881,3 @@ exports.default = GraphSearch;
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=bundle.js.map

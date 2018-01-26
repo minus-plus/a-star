@@ -10,7 +10,7 @@ module.exports = {
     path: path.resolve(__dirname, 'public')
   },
   watch: true,
-  devtool: 'cheap-module-source-map',
+  // devtool: 'cheap-module-source-map',
   module: {
     rules: [
       {
