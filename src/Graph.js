@@ -38,9 +38,11 @@ class Graph {
       for (let j = 0; j < this.grid.length; j++) {
         let prevW = this.grid[i][j].weight;
         this.grid[i][j].reset();
-        console.log(this.grid[i][j].weight, prevW);
+        // TODO
+        // have bugs here, grid can not be fully reset, cause wrong path
       }
     }
+    console.log("ending")
   }
 
 

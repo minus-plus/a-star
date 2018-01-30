@@ -16,6 +16,7 @@ domready(function() {
   let w = width - lineWith * 2;
   let r = ~~((width - lineWith * 2) / 3);
   let p = 0.2;
+  let diagonal = false;
 
   const defaultColor = "#e3e3e3";
 
@@ -36,7 +37,7 @@ domready(function() {
     r,
     p,
     defaultColor,
-    diagonal: false
+    diagonal
   };
 
   const graphSearch = new GraphSearch(option);

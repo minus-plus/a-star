@@ -48,7 +48,7 @@ class GraphSearch {
     this.lineWith = option.lineWith;
     this.r = option.r;
     this.w = this.width - this.lineWith * 2;
-    this.p = option.p;
+    this.p = option.p || +(this.frequency);
     this.canvas = option.canvas;
     this.ctx = option.canvas.getContext('2d');
     this.searchBtn = option.searchBtn;
@@ -59,10 +59,10 @@ class GraphSearch {
 
     this.init = this.init.bind(this);
     this.search = this.search.bind(this);
-    this.prevPath = [];
+    this.prevPath = null;
 
     this.init();
-    this.bindEventListner();
+    this.bindEventListener();
   }
 
   init() {
@@ -70,7 +70,7 @@ class GraphSearch {
     this.resetDimensions();
     this.start = null;
     this.end = null;
-    this.prevPath = [];
+    this.prevPath = null;
     this.matrix = this.constructor.generateMatrix(this.row, this.p);
     this.graph = new Graph(this.matrix, {diagonal: this.diagonal});
     this.draw();
@@ -87,7 +87,7 @@ class GraphSearch {
     this.constructor.drawRect(ctx, x * width + lineWidth, y * width + lineWidth, w, w, r, color);
   }
 
-  bindEventListner() {
+  bindEventListener() {
     this.canvas.addEventListener('click', (event) => {
       // do, check new start and goal, check
       const rect = canvas.getBoundingClientRect();
@@ -98,8 +98,6 @@ class GraphSearch {
 
     this.searchBtn.addEventListener('click', (event) => {
       let path = this.search();
-      console.log(this.start, this.end);
-      console.log(path);
       if (path.length) {
         for (let i = 0; i < path.length - 1; i++ ) {
           let node = path[i];
@@ -178,6 +176,15 @@ class GraphSearch {
   search() {
     // clear previous result
     if (this.start && this.end) {
+      if (this.prevPath) {
+        // this.graph.reset();
+        this.graph = new Graph(this.matrix);
+        this.start = this.graph.grid[this.start.x][this.start.y];
+        this.end = this.graph.grid[this.end.x][this.end.y];
+        // clear prevPath
+        this.clearPrevPath();
+      }
+
       this.prevPath = Astar.search(this.graph, this.start, this.end);
       return this.prevPath;
     }

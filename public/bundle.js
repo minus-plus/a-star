@@ -130,9 +130,11 @@ var Graph = function () {
         for (var j = 0; j < this.grid.length; j++) {
           var prevW = this.grid[i][j].weight;
           this.grid[i][j].reset();
-          console.log(this.grid[i][j].weight, prevW);
+          // TODO
+          // have bugs here, grid can not be fully reset, cause wrong path
         }
       }
+      console.log("ending");
     }
   }, {
     key: "cleanDirty",
@@ -393,6 +395,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   var w = width - lineWith * 2;
   var r = ~~((width - lineWith * 2) / 3);
   var p = 0.2;
+  var diagonal = false;
 
   var defaultColor = "#e3e3e3";
 
@@ -413,7 +416,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     r: r,
     p: p,
     defaultColor: defaultColor,
-    diagonal: false
+    diagonal: diagonal
   };
 
   var graphSearch = new _GraphSearch2.default(option);
@@ -725,7 +728,7 @@ var GraphSearch = function () {
     this.lineWith = option.lineWith;
     this.r = option.r;
     this.w = this.width - this.lineWith * 2;
-    this.p = option.p;
+    this.p = option.p || +this.frequency;
     this.canvas = option.canvas;
     this.ctx = option.canvas.getContext('2d');
     this.searchBtn = option.searchBtn;
@@ -736,10 +739,10 @@ var GraphSearch = function () {
 
     this.init = this.init.bind(this);
     this.search = this.search.bind(this);
-    this.prevPath = [];
+    this.prevPath = null;
 
     this.init();
-    this.bindEventListner();
+    this.bindEventListener();
   }
 
   _createClass(GraphSearch, [{
@@ -749,7 +752,7 @@ var GraphSearch = function () {
       this.resetDimensions();
       this.start = null;
       this.end = null;
-      this.prevPath = [];
+      this.prevPath = null;
       this.matrix = this.constructor.generateMatrix(this.row, this.p);
       this.graph = new _Graph2.default(this.matrix, { diagonal: this.diagonal });
       this.draw();
@@ -767,8 +770,8 @@ var GraphSearch = function () {
       this.constructor.drawRect(ctx, x * width + lineWidth, y * width + lineWidth, w, w, r, color);
     }
   }, {
-    key: 'bindEventListner',
-    value: function bindEventListner() {
+    key: 'bindEventListener',
+    value: function bindEventListener() {
       var _this = this;
 
       this.canvas.addEventListener('click', function (event) {
@@ -781,8 +784,6 @@ var GraphSearch = function () {
 
       this.searchBtn.addEventListener('click', function (event) {
         var path = _this.search();
-        console.log(_this.start, _this.end);
-        console.log(path);
         if (path.length) {
           for (var i = 0; i < path.length - 1; i++) {
             var node = path[i];
@@ -866,6 +867,15 @@ var GraphSearch = function () {
     value: function search() {
       // clear previous result
       if (this.start && this.end) {
+        if (this.prevPath) {
+          // this.graph.reset();
+          this.graph = new _Graph2.default(this.matrix);
+          this.start = this.graph.grid[this.start.x][this.start.y];
+          this.end = this.graph.grid[this.end.x][this.end.y];
+          // clear prevPath
+          this.clearPrevPath();
+        }
+
         this.prevPath = _Astar2.default.search(this.graph, this.start, this.end);
         return this.prevPath;
       }
