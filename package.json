@@ -8,7 +8,8 @@
     "dev": "npm-run-all --parallel dev:*",
     "dev:stylus": "stylus -w ./stylus/index.styl -o ./public/style.css",
     "dev:build": "webpack --watch",
-    "dev:server": "nodemon server.js"
+    "dev:server": "nodemon server.js",
+    "dev:pug": "pug ./views/index.pug --pretty --watch  -o ."
 
   },
   "author": "minus <yunwang010@gmail.com>",
